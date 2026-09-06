@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelBorder | AI Identity & Travel Document Screening Platform</title>
+  <meta name="description" content="Autonomous travel document screening and fraud interception platform. Multi-spectral OCR, ICAO 9303 checksum validation, Error Level Analysis (ELA), and 1:1 facial biometric matching.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       1. Clean Executive Header
+       ======================================================================== -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div class="brand-icon">SB</div>
+      <div>
+        <h1 class="brand-title">SENTINEL<span>BORDER</span></h1>
+        <p class="brand-subtitle">Automated Travel Document & Identity Screening Platform</p>
+      </div>
+    </div>
+
+    <!-- Centered Nav Switcher -->
+    <nav class="header-nav">
+      <button class="nav-btn active" id="navConsole" data-view="consoleView">
+        <span>🛡️ Document Screening</span>
+      </button>
+      <button class="nav-btn" id="navBiometrics" data-view="biometricsView">
+        <span>👤 Biometric Verification</span>
+      </button>
+    </nav>
+
+    <!-- Right Controls -->
+    <div class="header-right">
+      <div class="checkpoint-badge">
+        <span class="status-dot"></span>
+        <span>GATE 07 • DEL-INTL</span>
+      </div>
+      <label class="audio-control" title="Toggle audio feedback">
+        <input type="checkbox" id="audioToggleCheckbox" checked>
+        <span>Audio</span>
+      </label>
+      <button class="btn-dossier" id="btnForensicReport">
+        <span>📑 Case Dossier</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       2. Main Content Container
+       ======================================================================== -->
+  <main class="app-container">
+
+    <!-- VIEW 1: DOCUMENT SCREENING CONSOLE -->
+    <section id="consoleView" class="view-panel active">
+
+      <!-- Slim, Clean Document Preset Selector -->
+      <div class="document-preset-bar">
+        <div class="preset-strip-label">
+          <span>⚡ Select Test Case:</span>
+        </div>
+
+        <div class="preset-pill-list" id="demoScenariosStrip">
+          <!-- Populated by app.js -->
+        </div>
+
+        <div class="upload-action-group">
+          <a href="Traveler_Passport_Scan_Official.png" download="Traveler_Passport_Scan_Official.png" class="btn-download-test" id="btnDownloadTestDoc" title="Download official test passport scan to your PC">
+            ⬇️ Download Test Document
+          </a>
+          <label for="docFileInput" class="btn-upload" title="Upload local image or document scan">
+            📁 Upload Document
+          </label>
+          <input type="file" id="docFileInput" accept="image/*" style="display: none;">
+          <button class="btn-demo-samples" id="btnOpenDemoModal" title="View all offline demo passport scenarios">
+            📂 Demo Files
+          </button>
+        </div>
+      </div>
+
+      <!-- Spacious Operational Workspace Grid (54% / 46%) -->
+      <div class="workspace-grid">
+
+        <!-- Left: Document Verification Studio -->
+        <div class="document-studio">
+          <div class="studio-top">
+            <h2 class="studio-title">Multi-Spectral Optical Stage</h2>
+            <div class="view-toggle">
+              <button class="view-btn active" id="btnViewNormal">True-Color Scan</button>
+              <button class="view-btn" id="btnViewEla">Forensic ELA Heatmap</button>
+            </div>
+          </div>
+
+          <!-- Document Canvas Stage with Breathing Room -->
+          <div class="canvas-frame" id="docScannerZone">
+            <canvas id="docCanvas"></canvas>
+            <canvas id="elaCanvas"></canvas>
+
+            <!-- Radar Scanbeam -->
+            <div class="scanner-overlay">
+              <div class="scan-beam"></div>
+            </div>
+
+            <!-- Tampering Anomaly Bounding Box -->
+            <div class="tamper-box" id="tamperBoundingBox">
+              <span class="tamper-box-tag" id="tamperBoxLabel">ANOMALY DETECTED</span>
+            </div>
+
+            <!-- Drag and Drop Overlay Hint -->
+            <div class="drag-drop-hint" id="dragDropHint">
+              <span class="drop-icon">📥</span>
+              <span class="drop-text">DROP PASSPORT OR TRAVEL DOCUMENT TO SCAN</span>
+            </div>
+          </div>
+
+          <!-- Clean Hardware & Forensics Strip -->
+          <div class="metadata-strip" id="metaGrid">
+            <!-- Populated by app.js -->
+          </div>
+        </div>
+
+        <!-- Right: Analysis & Clearance Directive -->
+        <div class="analysis-column">
+
+          <!-- Executive Clearance Directive Banner -->
+          <div class="verdict-banner verdict-safe" id="riskVerdictCard">
+            <div class="verdict-info-block">
+              <span class="verdict-category">Immigration Clearance Directive</span>
+              <div class="verdict-headline" id="verdictDecision">CLEAR - ADMIT PASSENGER</div>
+              <p class="verdict-subtext" id="verdictSubtext">All 4 AI Screening Modules Passed without Exceptions</p>
+            </div>
+            <div class="verdict-score-block">
+              <div class="score-number" id="riskPercent">4%</div>
+              <div class="score-caption">Composite Risk</div>
+            </div>
+          </div>
+
+          <!-- Structured Findings Card -->
+          <div class="findings-card">
+            <!-- Tab Navigation -->
+            <div class="tab-nav-row">
+              <button class="tab-item-btn active" data-tab="tab-ocr">Module 1: OCR</button>
+              <button class="tab-item-btn" data-tab="tab-validation">Module 2: ICAO 9303</button>
+              <button class="tab-item-btn" data-tab="tab-tampering">Module 3: Tampering AI</button>
+              <button class="tab-item-btn" data-tab="tab-bio-preview">Module 4: Face Match</button>
+            </div>
+
+            <!-- Tab 1: OCR Extraction & MRZ -->
+            <div class="tab-panel active" id="tab-ocr">
+              <table class="clean-table">
+                <thead>
+                  <tr>
+                    <th>Extracted Field</th>
+                    <th>Inferred Value</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="ocrTableBody">
+                  <!-- Populated by app.js -->
+                </tbody>
+              </table>
+
+              <!-- MRZ Decoded Box -->
+              <div class="mrz-box">
+                <div class="mrz-label">
+                  <span>Machine Readable Zone (ICAO Doc 9303 Decoding)</span>
+                  <span style="color: var(--status-safe);">✓ TD3 PARSED</span>
+                </div>
+                <div class="mrz-string" id="mrzLine1">P&lt;INDSHARMA&lt;&lt;ADITYA&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</div>
+                <div class="mrz-string" id="mrzLine2">Z4892104&lt;7IND9205141M3208128&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;06</div>
+              </div>
+            </div>
+
+            <!-- Tab 2: ICAO Checksums & Rule Validation -->
+            <div class="tab-panel" id="tab-validation">
+              <div style="font-size: 12px; color: #94a3b8;">
+                Cryptographic <strong>7-3-1 weight sum modulo 10</strong> check digits calculated from MRZ payload:
+              </div>
+              <div class="diag-grid" id="checksumGrid">
+                <!-- Populated by app.js -->
+              </div>
+            </div>
+
+            <!-- Tab 3: Tampering AI Matrix -->
+            <div class="tab-panel" id="tab-tampering">
+              <div style="font-size: 12px; color: #94a3b8;">
+                Multi-Spectral Deep Learning Analysis (Photo Splicing, Font Kerning, Stamp Gamut, ELA):
+              </div>
+              <div id="tamperMatrixContainer" style="display: flex; flex-direction: column; gap: 12px;">
+                <!-- Populated by app.js -->
+              </div>
+            </div>
+
+            <!-- Tab 4: 1:1 Face Verification Preview -->
+            <div class="tab-panel" id="tab-bio-preview">
+              <div class="bio-dual-preview">
+                <div class="bio-crop-box">
+                  <span>Extracted Document Portrait</span>
+                  <div class="crop-window">
+                    <img id="consoleDocPortrait" alt="Passport Portrait">
+                  </div>
+                </div>
+                <div class="bio-crop-box">
+                  <span>Live Traveler Camera Feed</span>
+                  <div class="crop-window">
+                    <img id="consoleLivePortrait" alt="Live Traveler">
+                  </div>
+                </div>
+              </div>
+              <div style="background: rgba(19, 27, 46, 0.6); padding: 14px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-size: 11px; color: #64748b; text-transform: uppercase;">ArcFace Cosine Similarity:</div>
+                  <div style="font-family: var(--font-heading); font-size: 20px; font-weight: 700; color: #fff;" id="consoleBioScore">98.4% Match</div>
+                </div>
+                <button class="btn-upload" id="btnJumpToBioBay" style="padding: 8px 16px;">
+                  Open Biometric Bay →
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- VIEW 2: DEDICATED BIOMETRIC VERIFICATION BAY -->
+    <section id="biometricsView" class="biometric-station-view">
+      <div class="station-top-banner">
+        <div class="station-title-block">
+          <h2>Module 4: 1:1 Biometric Facial Verification</h2>
+          <p>
+            Verifies passenger identity against official document credentials using deep 512-dimensional ArcFace embeddings and passive anti-spoofing telemetry.
+          </p>
+        </div>
+        <button class="camera-action-btn" id="btnToggleWebcam">
+          📷 Activate Live Camera Feed
+        </button>
+      </div>
+
+      <div class="biometric-camera-grid">
+        <div class="camera-feed-card">
+          <div class="studio-top">
+            <h3 class="studio-title">Extracted Document Portrait</h3>
+            <span class="pill-tag tag-safe" style="font-size: 11px; padding: 2px 8px;">Official Record</span>
+          </div>
+          <div class="camera-feed-stage">
+            <img id="bioBayDocImg" style="max-height: 380px; border-radius: 8px; box-shadow: 0 12px 28px rgba(0,0,0,0.8);" alt="Document Crop">
+          </div>
+        </div>
+
+        <div class="camera-feed-card">
+          <div class="studio-top">
+            <h3 class="studio-title">Live Gate Traveler Camera</h3>
+            <span class="pill-tag tag-warn" id="cameraStatusBadge" style="font-size: 11px; padding: 2px 8px;">Optical Sensor Feed</span>
+          </div>
+          <div class="camera-feed-stage">
+            <img id="bioBayLiveImg" style="max-height: 380px; border-radius: 8px; box-shadow: 0 12px 28px rgba(0,0,0,0.8);" alt="Live Traveler">
+            <video id="liveWebcamVideo" autoplay muted playsinline style="display: none; max-height: 380px; border-radius: 8px;"></video>
+          </div>
+        </div>
+      </div>
+
+      <!-- Verification Telemetry -->
+      <div class="findings-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border-subtle);">
+          <div>
+            <div style="font-size: 11px; color: #64748b; text-transform: uppercase; font-family: var(--font-mono);">Biometric Evaluation Result:</div>
+            <div style="font-family: var(--font-heading); font-size: 24px; font-weight: 700; color: #fff;" id="bioBayScoreHeading">98.4% Match Verified</div>
+          </div>
+          <span class="pill-tag tag-safe" id="bioBayStatusBadge" style="font-size: 13px; padding: 6px 14px;">BIOMETRIC MATCH CONFIRMED</span>
+        </div>
+
+        <div class="diag-grid" style="margin-top: 10px;" id="bioBayTelemetryGrid">
+          <!-- Populated by app.js -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ========================================================================
+       3. Official Case Dossier Modal
+       ======================================================================== -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-window">
+      <div class="modal-header">
+        <h3>Immigration & Border Security Directorate • Document Examination Dossier</h3>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-upload" id="btnPrintReport" style="padding: 6px 14px; font-size: 12px;">🖨️ Print Dossier</button>
+          <button class="btn-dossier" id="closeReportModal" style="padding: 6px 14px; font-size: 12px;">Close</button>
+        </div>
+      </div>
+      <div class="modal-content">
+        <div class="dossier-page">
+          <div class="dossier-heading-bar">
+            <div>
+              <h2>GOVERNMENT IMMIGRATION & BORDER CONTROL</h2>
+              <p>Automated Travel Document & Biometric Security Screening Examination Report</p>
+            </div>
+            <div style="text-align: right; font-family: monospace; font-size: 12px;">
+              <div>CASE REF: <strong id="repCaseId">REF-2026-91024</strong></div>
+              <div id="repTimestamp">2026-09-06 21:50:00</div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div>
+              <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                <tr><td style="padding: 6px 0; color: #64748b;">Subject Traveler:</td><td style="font-weight: 700;" id="repName">ADITYA SHARMA</td></tr>
+                <tr><td style="padding: 6px 0; color: #64748b;">Document Number:</td><td style="font-weight: 700; font-family: monospace;" id="repDocNo">Z4892104</td></tr>
+                <tr><td style="padding: 6px 0; color: #64748b;">Claimed Nationality:</td><td style="font-weight: 700;" id="repNationality">INDIAN</td></tr>
+                <tr><td style="padding: 6px 0; color: #64748b;">Testing Category:</td><td style="font-weight: 700;" id="repCategory">Authentic Indian Passport</td></tr>
+                <tr><td style="padding: 6px 0; color: #64748b;">Clearance Verdict:</td><td style="font-weight: 800; color: #2563eb;" id="repDecision">CLEAR - ADMIT PASSENGER</td></tr>
+              </table>
+            </div>
+            <div>
+              <div style="font-size: 11px; color: #64748b; margin-bottom: 6px;">DOCUMENT EVIDENCE THUMBNAIL:</div>
+              <img id="repDocSnapshot" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px;" alt="Document Snapshot">
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; font-size: 12px; color: #475569;">
+            <strong>Officer Attestation & Forensic Record:</strong>
+            <p style="margin-top: 4px;">
+              This forensic examination was generated under automated neural screening rules following ICAO Doc 9303 and ISO/IEC 19794 specifications. 
+              The algorithmic forensic verification, Error Level Analysis (ELA) delta, and 1:1 facial biometric matching distance are permanently cataloged in the checkpoint audit ledger.
+            </p>
+            <div style="margin-top: 24px; display: flex; justify-content: space-between; font-size: 12px;">
+              <span>Checkpoint: <strong>DEL-T3-GATE-07</strong></span>
+              <span>Officer ID: <strong>INSP-8402-DEL</strong></span>
+              <span>Cryptographic Token: <strong style="font-family: monospace;">SHA256: 9b2e4...31a8</strong></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       4. Offline Demo Documents & Sample Passports Modal
+       ======================================================================== -->
+  <div class="modal-overlay" id="demoFilesModal">
+    <div class="modal-window demo-modal-window">
+      <div class="modal-header">
+        <div>
+          <h3>📁 Offline Demo Travel Documents & Passports</h3>
+          <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">High-resolution mock travel documents to test border security screening modules. Download PNG files to test upload, or load directly into the scanner.</p>
+        </div>
+        <button class="btn-dossier" id="closeDemoModal" style="padding: 6px 14px; font-size: 12px;">✕ Close</button>
+      </div>
+      <div class="modal-content">
+        <div class="demo-cards-grid">
+          
+          <!-- Sample 1: Clean Indian Passport -->
+          <div class="demo-card">
+            <div class="demo-card-preview">
+              <img src="demo_documents/01_PASS_Passport_Aditya_Sharma_Clean.png" alt="Clean Passport Preview" loading="lazy">
+              <span class="demo-badge tag-safe">100% GENUINE</span>
+            </div>
+            <div class="demo-card-body">
+              <h4 class="demo-card-title">01. Genuine Indian Passport</h4>
+              <p class="demo-card-sub">Aditya Sharma • Z4892104 • IND</p>
+              <p class="demo-card-desc">Authentic baseline document. Valid ICAO 9303 checksums, uniform ELA compression (8.4Δ), and 98.4% biometric facial match.</p>
+              <div class="demo-card-actions">
+                <a href="demo_documents/01_PASS_Passport_Aditya_Sharma_Clean.png" download="01_PASS_Passport_Aditya_Sharma_Clean.png" class="btn-demo-dl">⬇ Download PNG</a>
+                <button class="btn-demo-load" data-scenario="scenario-1">⚡ Load & Scan</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample 2: Tampered Photo Russian Passport -->
+          <div class="demo-card">
+            <div class="demo-card-preview">
+              <img src="demo_documents/02_FAIL_Passport_Viktor_Tampered_Photo.png" alt="Tampered Photo Preview" loading="lazy">
+              <span class="demo-badge tag-danger">PHOTO TAMPERED</span>
+            </div>
+            <div class="demo-card-body">
+              <h4 class="demo-card-title">02. Spliced Photo Replacement</h4>
+              <p class="demo-card-sub">Viktor Korzhov • 759281043 • RUS</p>
+              <p class="demo-card-desc">Photo altered digitally. Triggers Error Level Analysis (ELA) hotspot (89.6Δ), perimeter seam anomaly, and photo boundary alert.</p>
+              <div class="demo-card-actions">
+                <a href="demo_documents/02_FAIL_Passport_Viktor_Tampered_Photo.png" download="02_FAIL_Passport_Viktor_Tampered_Photo.png" class="btn-demo-dl">⬇ Download PNG</a>
+                <button class="btn-demo-load" data-scenario="scenario-2">⚡ Load & Scan</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample 3: Altered DOB German Passport -->
+          <div class="demo-card">
+            <div class="demo-card-preview">
+              <img src="demo_documents/03_FAIL_Passport_Elena_Altered_DOB.png" alt="Altered DOB Preview" loading="lazy">
+              <span class="demo-badge tag-danger">CHECKSUM MISMATCH</span>
+            </div>
+            <div class="demo-card-body">
+              <h4 class="demo-card-title">03. Altered Date of Birth</h4>
+              <p class="demo-card-sub">Elena Rostova • C4X092815 • DEU</p>
+              <p class="demo-card-desc">Visual DOB altered to 1998 (whiteout patch), but MRZ encodes 1985. Fails ICAO 9303 7-3-1 modulus-10 checksum validation.</p>
+              <div class="demo-card-actions">
+                <a href="demo_documents/03_FAIL_Passport_Elena_Altered_DOB.png" download="03_FAIL_Passport_Elena_Altered_DOB.png" class="btn-demo-dl">⬇ Download PNG</a>
+                <button class="btn-demo-load" data-scenario="scenario-3">⚡ Load & Scan</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample 4: Forged Visa Stamp -->
+          <div class="demo-card">
+            <div class="demo-card-preview">
+              <img src="demo_documents/04_FAIL_Visa_Rajesh_Forged_Stamp.png" alt="Forged Visa Stamp Preview" loading="lazy">
+              <span class="demo-badge tag-warn">FORGED VISA STAMP</span>
+            </div>
+            <div class="demo-card-body">
+              <h4 class="demo-card-title">04. Forged Schengen Visa Stamp</h4>
+              <p class="demo-card-sub">Rajesh Patel • V9812401 • FRA</p>
+              <p class="demo-card-desc">Stay duration altered from 30 to 90 days with unauthorized entry stamp. Detected via RGB color gamut discrepancy and ink bleed.</p>
+              <div class="demo-card-actions">
+                <a href="demo_documents/04_FAIL_Visa_Rajesh_Forged_Stamp.png" download="04_FAIL_Visa_Rajesh_Forged_Stamp.png" class="btn-demo-dl">⬇ Download PNG</a>
+                <button class="btn-demo-load" data-scenario="scenario-4">⚡ Load & Scan</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sample 5: Interpol Red Notice & Expired -->
+          <div class="demo-card">
+            <div class="demo-card-preview">
+              <img src="demo_documents/05_FAIL_Passport_Carlos_Interpol_Hit.png" alt="Interpol Hit Preview" loading="lazy">
+              <span class="demo-badge tag-danger" style="background: rgba(220, 38, 38, 0.4); border: 1px solid #ef4444;">INTERPOL RED NOTICE</span>
+            </div>
+            <div class="demo-card-body">
+              <h4 class="demo-card-title">05. Wanted Fugitive & Expired</h4>
+              <p class="demo-card-sub">Carlos Mendez • P10928374 • VEN</p>
+              <p class="demo-card-desc">Document expired in 2021 + Active Interpol Red Notice match for transnational financial fraud. Triggers 99% risk detention alert.</p>
+              <div class="demo-card-actions">
+                <a href="demo_documents/05_FAIL_Passport_Carlos_Interpol_Hit.png" download="05_FAIL_Passport_Carlos_Interpol_Hit.png" class="btn-demo-dl">⬇ Download PNG</a>
+                <button class="btn-demo-load" data-scenario="scenario-6">⚡ Load & Scan</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="assets.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
