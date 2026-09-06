@@ -624,6 +624,7 @@ const AssetGenerator = {
     return [
       {
         id: 'scenario-1',
+        staticDocPath: './01_PASS_Passport_Aditya_Sharma_Clean.png',
         title: 'Authentic Indian Passport',
         subtitle: 'Aditya Sharma (Clear Border Clearance)',
         badge: 'AUTHENTIC',
@@ -675,6 +676,7 @@ const AssetGenerator = {
       },
       {
         id: 'scenario-2',
+        staticDocPath: './02_FAIL_Passport_Viktor_Tampered_Photo.png',
         title: 'Altered Date of Birth',
         subtitle: 'Vikram Singh (Text Manipulation & Checksum Mismatch)',
         badge: 'TEXT TAMPERED',
@@ -726,6 +728,7 @@ const AssetGenerator = {
       },
       {
         id: 'scenario-3',
+        staticDocPath: './03_FAIL_Passport_Elena_Altered_DOB.png',
         title: 'Photo Spliced UK Passport',
         subtitle: 'David Miller (Photo Replacement & EXIF Fraud Tag)',
         badge: 'PHOTO REPLACED',
@@ -777,6 +780,7 @@ const AssetGenerator = {
       },
       {
         id: 'scenario-4',
+        staticDocPath: './04_FAIL_Visa_Rajesh_Forged_Stamp.png',
         title: 'Forged Schengen Visa Stamp',
         subtitle: 'Rajesh Patel (Rubber Stamp Pigment & Stay Alteration)',
         badge: 'FORGED STAMP',
@@ -877,6 +881,7 @@ const AssetGenerator = {
       },
       {
         id: 'scenario-6',
+        staticDocPath: './05_FAIL_Passport_Carlos_Interpol_Hit.png',
         title: 'Interpol Watchlist & Expired Doc',
         subtitle: 'Carlos Mendez (Red Notice Match & Expired Passport)',
         badge: 'INTERPOL HIT',

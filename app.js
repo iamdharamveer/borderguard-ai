@@ -251,7 +251,7 @@ const Controller = {
     });
   },
 
-  loadScenario(scenarioId) {
+  async loadScenario(scenarioId) {
     const scenario = State.scenarios.find(s => s.id === scenarioId);
     if (!scenario) return;
     State.currentScenario = scenario;
@@ -259,6 +259,29 @@ const Controller = {
     document.querySelectorAll('.preset-pill').forEach(p => p.classList.remove('active'));
     const activePill = document.getElementById(`pill-${scenarioId}`);
     if (activePill) activePill.classList.add('active');
+
+    // Prefer the real uploaded demo PNG when this scenario has one.
+    // This keeps the Demo Files preview and the scanner in sync on GitHub Pages.
+    if (scenario.staticDocPath) {
+      try {
+        const img = new Image();
+        img.decoding = 'async';
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+          img.src = scenario.staticDocPath;
+        });
+
+        const canvas = document.createElement('canvas');
+        canvas.width = img.naturalWidth || img.width;
+        canvas.height = img.naturalHeight || img.height;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+        scenario.docCanvas = canvas;
+        scenario.docImg = scenario.staticDocPath;
+      } catch (err) {
+        console.warn('Static demo document could not be loaded:', scenario.staticDocPath, err);
+      }
+    }
 
     this.triggerScanPipeline(scenario);
   },
@@ -942,8 +965,8 @@ const Controller = {
         category: 'VALID',
         docType: 'Passport',
         docImg: dataUrl,
-        portraitImg: 'demo_documents/01_PASS_Passport_Aditya_Sharma_Clean.png',
-        liveImg: 'demo_documents/01_PASS_Passport_Aditya_Sharma_Clean.png',
+        portraitImg: './01_PASS_Passport_Aditya_Sharma_Clean.png',
+        liveImg: './01_PASS_Passport_Aditya_Sharma_Clean.png',
         rawMeta: {
           software: 'Certified Border Scanner Firmware v4.2 - Lossless Official',
           camera: 'Certified Optical Border Scanner 600 DPI',
@@ -994,8 +1017,8 @@ const Controller = {
         category: 'PHOTO_REPLACED',
         docType: 'Passport',
         docImg: dataUrl,
-        portraitImg: 'demo_documents/02_FAIL_Passport_Viktor_Tampered_Photo.png',
-        liveImg: 'demo_documents/02_FAIL_Passport_Viktor_Tampered_Photo.png',
+        portraitImg: './02_FAIL_Passport_Viktor_Tampered_Photo.png',
+        liveImg: './02_FAIL_Passport_Viktor_Tampered_Photo.png',
         rawMeta: {
           software: 'Adobe Photoshop 2024.1 (Digital Editing Signature)',
           camera: 'Flatbed Scanner / Modified Buffer',
@@ -1046,8 +1069,8 @@ const Controller = {
         category: 'TAMPERED_TEXT',
         docType: 'Passport',
         docImg: dataUrl,
-        portraitImg: 'demo_documents/03_FAIL_Passport_Elena_Altered_DOB.png',
-        liveImg: 'demo_documents/03_FAIL_Passport_Elena_Altered_DOB.png',
+        portraitImg: './03_FAIL_Passport_Elena_Altered_DOB.png',
+        liveImg: './03_FAIL_Passport_Elena_Altered_DOB.png',
         rawMeta: {
           software: 'GIMP 2.10.32 (Infill Layer Detected)',
           camera: 'Digital Camera Capture',
@@ -1098,8 +1121,8 @@ const Controller = {
         category: 'FORGED_STAMP',
         docType: 'Visa',
         docImg: dataUrl,
-        portraitImg: 'demo_documents/04_FAIL_Visa_Rajesh_Forged_Stamp.png',
-        liveImg: 'demo_documents/04_FAIL_Visa_Rajesh_Forged_Stamp.png',
+        portraitImg: './04_FAIL_Visa_Rajesh_Forged_Stamp.png',
+        liveImg: './04_FAIL_Visa_Rajesh_Forged_Stamp.png',
         rawMeta: {
           software: 'Adobe Photoshop CS6 (Windows)',
           camera: 'Mobile Device Document Scan',
@@ -1152,8 +1175,8 @@ const Controller = {
         category: 'WATCHLIST_HIT',
         docType: 'Passport',
         docImg: dataUrl,
-        portraitImg: 'demo_documents/05_FAIL_Passport_Carlos_Interpol_Hit.png',
-        liveImg: 'demo_documents/05_FAIL_Passport_Carlos_Interpol_Hit.png',
+        portraitImg: './05_FAIL_Passport_Carlos_Interpol_Hit.png',
+        liveImg: './05_FAIL_Passport_Carlos_Interpol_Hit.png',
         rawMeta: {
           software: 'SAIME Venezuela Travel Authority',
           camera: 'Official Capture System 2011',
